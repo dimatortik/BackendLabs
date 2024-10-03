@@ -1,0 +1,41 @@
+# Ignore .NET build output directories
+**bin/
+**obj/
+
+# Ignore JetBrains Rider temporary files
+.idea/
+*.idea.*
+
+# Ignore Visual Studio Code temporary files
+.vscode/
+
+# Ignore MacOS system files
+.DS_Store
+/.DS_Store
+
+# Ignore NuGet Packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+/[Pp]ackages/*
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+
+# Ignore ASP.NET files
+*.asax.resx
+*.ascx.resx
+*.master.resx
+*.aspx.resx
+*.svc.resx
+
+# Ignore Docker-related temporary files
+Dockerfile.*
+
+
+# Ignore project artifacts
+*.db
+*.cache
+
+# Ignore lock files
+project.lock.json
+project.fragment.lock.json
+yarn.lock
