@@ -1,0 +1,10 @@
+﻿services:
+  backendlabs_1:
+    image: backendlabs_1
+    build:
+      context: .
+      dockerfile: BackendLabs_1/Dockerfile
+    ports:
+      - "5123:8080"
+    environment:
+        - "ASPNETCORE_ENVIRONMENT=Release"

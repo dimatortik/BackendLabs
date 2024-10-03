@@ -11,14 +11,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/healthcheck", () =>
+app.MapGet("/healthcheck", () => Results.Ok(new
 {
-    return Results.Ok(new
-    {
-        status = "Healthy",
-        time = DateTime.Now.ToString(" yyyy MMMM dd HH:mm:ss K", CultureInfo.InvariantCulture)
-    });
-
-});
+    status = "Healthy",
+    time = DateTime.Now.ToString(" yyyy MMMM dd HH:mm:ss K", CultureInfo.InvariantCulture)
+}));
 
 app.Run();
