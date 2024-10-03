@@ -8,10 +8,10 @@ COPY ["BackendLabs_1/BackendLabs_1.csproj", "BackendLabs_1/"]
 RUN dotnet restore "BackendLabs_1/BackendLabs_1.csproj"
 COPY . .
 WORKDIR "/src/BackendLabs_1"
-RUN dotnet build "BackendLabs_1.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "BackendLabs_1.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "BackendLabs_1.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "BackendLabs_1.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app

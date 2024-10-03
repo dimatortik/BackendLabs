@@ -6,5 +6,3 @@
       dockerfile: BackendLabs_1/Dockerfile
     ports:
       - "5123:8080"
-    environment:
-        - "ASPNETCORE_ENVIRONMENT=Release"
