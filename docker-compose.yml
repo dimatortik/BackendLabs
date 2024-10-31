@@ -7,10 +7,10 @@
     ports:
       - "5123:8080"
 
-    backendlabs_2:
-      image: backendlabs_2
-      build:
-          context: .
-          dockerfile: BackendLabs_2/Dockerfile
-      ports:
-        - "5124:8080"
+  backendlabs_2:
+    image: backendlabs_2
+    build:
+        context: .
+        dockerfile: BackendLabs_2/Dockerfile
+    ports:
+      - "5124:8080"
