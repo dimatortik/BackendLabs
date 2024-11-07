@@ -14,3 +14,16 @@
         dockerfile: BackendLabs_2/Dockerfile
     ports:
       - "5124:8080"
+    depends_on:
+      - postgresLab_3
+  
+  postgresLab_3:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "Lab3"
+    ports:
+      - "5437:5432"
+    
+    
