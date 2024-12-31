@@ -1,55 +1,57 @@
 using BackendLabs_2.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendLabs_2.Controllers;
 [ApiController]
 [Route("category")]
-public class CategoryController: ControllerBase
+public class CategoryController(AppDbContext context): ControllerBase
 {
-    private static List<Category> _categories =
-    [
-        new Category { Id = 1, Name = "Fora Sandwich" },
-        new Category { Id = 2, Name = "Fora Burger" },
-    ];
     
     [HttpGet]
-    public ActionResult<Category> GetCategories()
+    public async Task<ActionResult> GetCategories()
     {
-        return Ok(_categories);
+        var category = await context.Categories.ToListAsync();
+        return Ok(category);
     }
     
     [HttpGet("{id}")]
-    public ActionResult<Category> GetCategory(int id)
+    public async Task<ActionResult> GetCategory(int id)
     {
-        var category = _categories.FirstOrDefault(c => c.Id == id);
+        var category = await context.Categories.FirstOrDefaultAsync(c => c.Id == id);
         if (category == null)
         {
             return NotFound();
         }
-        return category;
+        return Ok(category);
     }
     
     [HttpPost]
-    public ActionResult<Category> CreateCategory([FromBody]CreateCategoryRequest request)
+    public async Task<IActionResult> CreateCategory([FromBody]CreateCategoryRequest request)
     {
-        var category = new Category
+        var isCategoryExist = await context.Categories.AnyAsync(c => c.Name == request.Name);
+        if (isCategoryExist)
         {
-            Id = _categories.Count + 1,
+            return BadRequest("Category already exists");
+        }
+        var category = new Category()
+        {
             Name = request.Name
         };
-        _categories.Add(category);
+        await context.Categories.AddAsync(category);
+        await context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
     }
     
     [HttpDelete("{id}")]
-    public ActionResult DeleteCategory(int id)
+    public async Task<ActionResult> DeleteCategory(int id)
     {
-        var category = _categories.FirstOrDefault(c => c.Id == id);
+        var category = await context.Categories.FirstOrDefaultAsync(c => c.Id == id);
         if (category == null)
         {
             return NotFound();
         }
-        _categories.Remove(category);
+        context.Categories.Remove(category);
         return NoContent();
     }
     

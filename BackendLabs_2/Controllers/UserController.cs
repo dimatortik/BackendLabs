@@ -1,58 +1,86 @@
 using BackendLabs_2.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendLabs_2.Controllers;
 [ApiController]
-public class UserController : ControllerBase
+public class UserController(AppDbContext context) : ControllerBase
 {
-    private static List<User> _users =
-    [
-        new User{ Id = 1, Name = "John" },
-        new User{ Id = 2, Name = "Doe" },
-        new User { Id = 3, Name = "Jane" },
-        new User{ Id = 4, Name = "Daniel" },
-
-    ];
-    
     [HttpGet("/users")]
-    public ActionResult<IEnumerable<User>> GetUsers()
+    public async Task<IActionResult> GetUsers()
     {
-        return _users;
+        var users = await context.Users.ToListAsync();
+        return users.Count != 0 ? Ok(users) : NotFound();
     }
     
+    
     [HttpGet("/user/{id}")]
-    public ActionResult<User> GetUser(int id)
+    public async Task<IActionResult> GetUser(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (user == null)
         {
             return NotFound();
         }
-        return user;
+        return Ok(user);
     }
     
     [HttpPost("/user")]
-    public ActionResult<User> CreateUser([FromBody]CreateUserRequest request)
+    public async Task<IActionResult> CreateUser([FromBody]CreateUserRequest request)
     {
-        var user = new User
+        var currency = await context.Currencies.FirstOrDefaultAsync(c => c.Symbol == request.DefaultCurrencySymbol);
+        if (currency == null)
         {
-            Id = _users.Count + 1,
-            Name = request.Name
-        };
-        _users.Add(user);
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            return BadRequest("Currency not found");
+        }
+
+        try
+        {
+            var user = Models.User.Create(request.Name, currency);
+            await context.Users.AddAsync(user);
+            await context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        } 
+        
     }
     
     [HttpDelete("/user/{id}")]
-    public ActionResult DeleteUser(int id)
+    public async Task<ActionResult> DeleteUser(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (user == null)
         {
             return NotFound();
         }
-        _users.Remove(user);
+        context.Users.Remove(user);
+        await context.SaveChangesAsync();
+        return NoContent();
+    }
+    
+    [HttpPut("/user/{id}/currency/")]
+    public async Task<ActionResult> ChangeUserCurrency(int id, [FromBody]ChangeUserCurrencyRequest request)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        var currency = await context.Currencies.FirstOrDefaultAsync(c => c.Symbol == request.CurrencySymbol);
+        if (currency == null)
+        {
+            return BadRequest("Currency not found");
+        }
+        user.DefaultCurrency = currency;
+        await context.SaveChangesAsync();
         return NoContent();
     }
 }
-public record CreateUserRequest(string Name);
+
+public record ChangeUserCurrencyRequest(string CurrencySymbol);
+
+
+public record CreateUserRequest(string Name, string DefaultCurrencySymbol);
