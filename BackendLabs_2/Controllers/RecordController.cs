@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using BackendLabs_2.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -109,8 +111,12 @@ public class RecordController(AppDbContext context, Freecurrencyapi fx) : Contro
             return BadRequest("Currency not found");
         }
         
-        var newTotalAmount = Convert.ToDecimal(
-            fx.Latest(record.Currency.Symbol, currency.Symbol)) * record.TotalAmount;
+        var coefJson = fx.Latest(record.Currency.Symbol, currency.Symbol);
+        
+        var coef = JsonSerializer.Deserialize<CurrencyResponse>(coefJson);
+
+        var newTotalAmount = coef.Data.GetValueOrDefault(currency.Symbol)
+             * record.TotalAmount;
         
         record.Currency = currency;
         record.TotalAmount = newTotalAmount;
@@ -124,3 +130,9 @@ public record ChangeRecordCurrencyRequest(string CurrencySymbol);
 
 
 public record CreateRecordRequest(int UserId, int CategoryId, decimal TotalAmount, string? CurrencySymbol);
+
+public class CurrencyResponse
+{
+    [JsonPropertyName("data")]
+    public Dictionary<string, decimal> Data { get; set; }
+}
