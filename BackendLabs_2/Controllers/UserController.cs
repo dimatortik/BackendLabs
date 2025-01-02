@@ -1,10 +1,13 @@
 using BackendLabs_2.Models;
+using BackendLabs_2.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendLabs_2.Controllers;
 [ApiController]
-public class UserController(AppDbContext context) : ControllerBase
+[Authorize]
+public class UserController(AppDbContext context, IAuthenticationService auth) : ControllerBase
 {
     [HttpGet("/users")]
     public async Task<IActionResult> GetUsers()
@@ -25,27 +28,30 @@ public class UserController(AppDbContext context) : ControllerBase
         return Ok(user);
     }
     
-    [HttpPost("/user")]
-    public async Task<IActionResult> CreateUser([FromBody]CreateUserRequest request)
+    [HttpPost("/register")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RegisterUser([FromBody]RegisterRequestModel request)
     {
-        var currency = await context.Currencies.FirstOrDefaultAsync(c => c.Symbol == request.DefaultCurrencySymbol);
-        if (currency == null)
+        var result = await auth.Register(request);
+
+        if (result?.ErrorMessage is not null)
         {
-            return BadRequest("Currency not found");
+            return BadRequest(result.ErrorMessage);
         }
 
-        try
+        return Ok(result);
+    }
+    [HttpPost("/login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> LoginUser([FromBody]LoginRequestModel request)
+    {
+        var result = await auth.Login(request);
+
+        if (result is null)
         {
-            var user = Models.User.Create(request.Name, currency);
-            await context.Users.AddAsync(user);
-            await context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            return BadRequest("Invalid username or password");
         }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        } 
-        
+        return Ok(result);
     }
     
     [HttpDelete("/user/{id}")]

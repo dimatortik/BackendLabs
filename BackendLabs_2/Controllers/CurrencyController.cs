@@ -1,10 +1,12 @@
 using BackendLabs_2.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendLabs_2.Controllers;
 
 [ApiController]
+[Authorize]
 public class CurrencyController(AppDbContext context): ControllerBase
 {
     

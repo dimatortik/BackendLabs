@@ -4,11 +4,13 @@ using BackendLabs_2.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using freecurrencyapi;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackendLabs_2.Controllers;
 
 [ApiController]
 [Route("record")]
+[Authorize]
 public class RecordController(AppDbContext context, Freecurrencyapi fx) : ControllerBase
 {
     [HttpGet("{id}")]
