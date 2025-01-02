@@ -13,7 +13,10 @@ public class User
     public int DefaultCurrencyId { get; set; }
     public virtual Currency? DefaultCurrency { get; set; } = null!;
     
-    // create fabric method with some validation
+    [Required]
+    [DataType(DataType.Password)]
+    public string PasswordHash { get; set; }
+    
     public static User Create(string name, Currency currency)
     {
         if (string.IsNullOrWhiteSpace(name))
