@@ -40,7 +40,7 @@ public class RecordController(AppDbContext context, Freecurrencyapi fx) : Contro
         }
 
         Currency currency = null!;
-        if (request.CurrencySymbol == null)
+        if (string.IsNullOrWhiteSpace(request.CurrencySymbol))
         {
             currency = user.DefaultCurrency!;
         }
